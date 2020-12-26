@@ -38,10 +38,61 @@ def write_graph(edges_dict: dict):
             file.write(str(edges[0]) + ',' + str(edges[1]) + '\n')
 
 
+def del_node(graph: dict, node: int) -> dict:
+    if graph.get(node) is not None:
+        del graph[node]
+    for edge in graph.keys():
+        if node in graph[edge]:
+            graph[edge].remove(node)
+    return graph
+
+
+def find_component(graph: dict, source):
+    if source is None or source not in graph:
+        return "Invalid input"
+    graph_c = graph.copy()
+    stack = {source}
+    used_nodes = set()
+
+    while len(stack) != 0:
+        stack_c = stack.copy()
+        for node in stack_c:
+            used_nodes.add(node)
+            to_add = graph[node]
+            stack.remove(node)
+            stack |= to_add
+            graph_c = del_node(graph_c, node)
+    return used_nodes
+
+
+def find_components(graph: dict):
+    graph_c = graph.copy()
+    min_points = set()
+    keys = set(graph_c.keys())
+    while graph_c:
+        component = find_component(graph_c, keys.pop())
+        print(component)
+        min_points.add(min(component))
+        keys -= component
+        for key0 in component:
+            del graph_c[key0]
+    return min_points
+
+
 def main():
     pass
 
 
 if __name__ == '__main__':
-    write_graph(get_oriented_graph_from_file('data1.txt'))
+    print(get_not_oriented_graph_from_file('data1.txt'))
+    gr = get_not_oriented_graph_from_file('data1.txt')
+    # print(list(gr.keys())[0])
+
+    graph = {"A": {"B", "C", "D"},
+             "B": {"E"},
+             "C": {"F", "G"},
+             "D": {"H"},
+             "E": {"I"},
+             "F": {"J"}}
+    print(find_components(gr))
     main()
