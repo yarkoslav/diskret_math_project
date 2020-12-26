@@ -1,0 +1,1 @@
+# diskret_math_project
