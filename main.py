@@ -79,6 +79,21 @@ def find_components(graph: dict):
     return min_points
 
 
+def zvyaznist(graph: dict) -> list:
+    lst_tops = list()
+    counter = 0
+    while graph != {}:
+        for element in graph:
+            if len(lst_tops) == counter:
+                lst_tops.append(graph[element])
+            else:
+                if element in lst_tops[counter]:
+                    for top in graph[element]:
+                        lst_tops[counter].add(top)
+        for top in lst_tops[counter]:
+            graph.pop(top)
+        counter += 1
+    return [min(top) for top in lst_tops]
 def main():
     pass
 
