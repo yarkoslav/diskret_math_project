@@ -5,26 +5,46 @@ main module of project
 
 def get_not_oriented_graph_from_file(file_name: str) -> dict:
     edges_dict = {}
-    for line in open(file_name, 'r'):
-        edge = list(map(int, line.strip().split(',')))
-        for i in range(2):
-            j = 1 - i
-            try:
-                edges_dict[edge[i]].add(edge[j])
-            except KeyError:
-                edges_dict[edge[i]] = {edge[j]}
+    with open(file_name, 'r') as f:
+        f.readline()
+        line = f.readline()
+        while line != '':
+            edge = list(map(int, line.strip().split()))
+            for i in range(2):
+                j = 1 - i
+                try:
+                    edges_dict[edge[i]].add(edge[j])
+                except KeyError:
+                    edges_dict[edge[i]] = {edge[j]}
+            line = f.readline()
     return edges_dict
 
 
 def get_oriented_graph_from_file(file_name: str) -> dict:
     edges_dict = {}
-    for line in open(file_name, 'r'):
-        edge = list(map(int, line.strip().split(',')))
-        try:
-            edges_dict[edge[0]].add(edge[1])
-        except KeyError:
-            edges_dict[edge[0]] = {edge[1]}
+    with open(file_name, 'r') as f:
+        f.readline()
+        line = f.readline()
+        while line != '':
+            edge = list(map(int, line.strip().split()))
+            try:
+                edges_dict[edge[0]].add(edge[1])
+            except KeyError:
+                edges_dict[edge[0]] = {edge[1]}
+            line = f.readline()
     return edges_dict
+
+
+def read_graph(file_name: str) -> (dict, int):
+    graph = {}
+    dir_not_dir = -1 # not directed (0) or directed (1)
+    if file_name[-4:] == '.csv':
+        dir_not_dir = int(file_name[-5])
+        if dir_not_dir == 0:
+            graph = get_not_oriented_graph_from_file(file_name)
+        elif dir_not_dir == 1:
+            graph = get_oriented_graph_from_file(file_name)
+    return graph, dir_not_dir
 
 
 def write_graph(edges_dict: dict):
@@ -99,8 +119,8 @@ def main():
 
 
 if __name__ == '__main__':
-    print(get_not_oriented_graph_from_file('data1.txt'))
-    gr = get_not_oriented_graph_from_file('data1.txt')
+    # print(get_not_oriented_graph_from_file('data1.txt'))
+    # gr = get_not_oriented_graph_from_file('data1.txt')
     # print(list(gr.keys())[0])
 
     graph = {"A": {"B", "C", "D"},
@@ -109,5 +129,5 @@ if __name__ == '__main__':
              "D": {"H"},
              "E": {"I"},
              "F": {"J"}}
-    print(find_components(gr))
-    main()
+    # print(find_components(gr))
+    # main()
