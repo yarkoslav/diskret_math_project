@@ -1,3 +1,6 @@
+from main import read_graph
+graph = read_graph('./gr')
+
 def get_oriented_graph_from_file(file_name: str) -> dict:
     edges_dict = {}
     with open(file_name, "r") as file:
