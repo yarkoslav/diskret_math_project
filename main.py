@@ -4,9 +4,10 @@ main module of project
 
 
 def get_not_oriented_graph_from_file(file_name: str) -> dict:
-    edges_dict = {}
+    # edges_dict = {}
     with open(file_name, 'r') as f:
-        f.readline()
+        nodes = list(map(int, (f.readline()).strip().split()))[0]
+        edges_dict = {i: set() for i in range(1, nodes+1)}
         line = f.readline()
         while line != '':
             edge = list(map(int, line.strip().split()))
@@ -21,9 +22,10 @@ def get_not_oriented_graph_from_file(file_name: str) -> dict:
 
 
 def get_oriented_graph_from_file(file_name: str) -> dict:
-    edges_dict = {}
+    # edges_dict = {}
     with open(file_name, 'r') as f:
-        f.readline()
+        nodes = list(map(int, (f.readline()).strip().split()))[0]
+        edges_dict = {i: set() for i in range(1, nodes + 1)}
         line = f.readline()
         while line != '':
             edge = list(map(int, line.strip().split()))
@@ -37,6 +39,7 @@ def get_oriented_graph_from_file(file_name: str) -> dict:
 
 def read_graph(file_name: str) -> (dict, int):
     graph = {}
+    nodes = set()
     dir_not_dir = -1 # not directed (0) or directed (1)
     if file_name[-4:] == '.csv':
         dir_not_dir = int(file_name[-5])
