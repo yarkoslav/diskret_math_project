@@ -63,7 +63,7 @@ def write_graph(edges_dict: dict, file_name='graph.csv', directed=False):
 ###############################################################################
 # TASK 3
 ###############################################################################
-def find_components(graph: dict) -> list:
+def find_components_min_nodes(graph: dict) -> list:
     lst_tops = list()
     counter = 0
     while graph != {}:
@@ -157,14 +157,45 @@ def strong_connection(graph: dict) -> list:
 
 
 ###############################################################################
+# help for tasks 5 and 6
+def find_components(graph: dict) -> list:
+    lst_tops = list()
+    counter = 0
+    graph_c = copy.deepcopy(graph)
+    while graph_c != {}:
+        set_tops = set()
+        for element in graph_c:
+            set_tops.add(element)
+            while True:
+                for top in graph_c[element]:
+                    set_tops.add(top)
+                help_set = copy.deepcopy(set_tops)
+                for top in help_set:
+                    if top in graph_c:
+                        for each_top in graph_c[top]:
+                            set_tops.add(each_top)
+                if help_set == set_tops:
+                    break
+            lst_tops.append(set_tops)
+            break
+        for top in lst_tops[counter]:
+            graph_c.pop(top)
+        counter += 1
+    components = [{node: graph[node] for node in component}
+                  for component in lst_tops]
+    return components
+
+
+###############################################################################
 # TASK 5
 ###############################################################################
 def cutpoints_searching(graph: dict) -> list:
     def find_articulation_points(graph_dict: dict, input_node: int):
         stack = [input_node]
+        used = {input_node}
         result = set()
         parents = {input_node: -1}
-        sons = {i: set() for i in range(1, len(graph_dict)+1)}
+        sons = {key: set() for key in graph_dict}
         tin = {input_node: 0}
         low = {input_node: 0}
         idx = 0
@@ -173,13 +204,14 @@ def cutpoints_searching(graph: dict) -> list:
             node = stack[-1]
             is_dead_end = True
             for element in graph_dict[node]:
-                if element not in order:
+                if element not in used:
                     is_dead_end = False
                     parents[element] = node
                     sons[node].add(element)
                     idx += 1
                     tin[element] = idx
                     stack.append(element)
+                    used.add(element)
                     order.append(element)
                     break
             if is_dead_end:
@@ -194,7 +226,7 @@ def cutpoints_searching(graph: dict) -> list:
             for node in sons[swap[idx]]:
                 possible_values.append(low[node])
             low[swap[idx]] = min(possible_values)
-        for idx in range(1, len(graph_dict)+1):
+        for idx in graph_dict:
             if idx != input_node:
                 is_articulation = True
                 if len(sons[idx]) == 0:
@@ -207,7 +239,16 @@ def cutpoints_searching(graph: dict) -> list:
                     result.add(idx)
         if len(sons[input_node]) > 1:
             result.add(input_node)
-        return list(result), order
+        return result
+
+
+    res = set()
+    components = find_components(graph)
+    for component in components:
+        node = list(component.keys())[0]
+        result = find_articulation_points(component, node)
+        res = res | result
+    return list(res)
 
 
     used = set()
@@ -226,9 +267,10 @@ def cutpoints_searching(graph: dict) -> list:
 def bridge_searching(graph: dict) -> list:
     def find_bridges(graph_dict: dict, input_node: int):
         stack = [input_node]
+        used = {input_node}
         result = set()
         parents = {input_node: -1}
-        sons = {i: set() for i in range(1, len(graph_dict)+1)}
+        sons = {key: set() for key in graph_dict}
         tin = {input_node: 0}
         low = {input_node: 0}
         idx = 0
@@ -237,13 +279,14 @@ def bridge_searching(graph: dict) -> list:
             node = stack[-1]
             is_dead_end = True
             for element in graph_dict[node]:
-                if element not in order:
+                if element not in used:
                     is_dead_end = False
                     parents[element] = node
                     sons[node].add(element)
                     idx += 1
                     tin[element] = idx
                     stack.append(element)
+                    used.add(element)
                     order.append(element)
                     break
             if is_dead_end:
@@ -258,20 +301,18 @@ def bridge_searching(graph: dict) -> list:
             for node in sons[swap[idx]]:
                 possible_values.append(low[node])
             low[swap[idx]] = min(possible_values)
-        for idx in range(1, len(graph_dict)+1):
+        for idx in graph_dict:
             for node in sons[idx]:
                 if low[node] > tin[idx]:
                     result.add((idx, node))
-        return list(result), order
+        return result
 
-
-    used = set()
     res = set()
-    for node in graph:
-        if node not in used:
-            result, order = find_bridges(graph, node)
-            res = res | set(result)
-            used = used | set(order)
+    components = find_components(graph)
+    for component in components:
+        node = list(component.keys())[0]
+        result = find_bridges(component, node)
+        res = res | result
     return list(res)
 
 
