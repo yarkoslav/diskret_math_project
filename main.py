@@ -1,136 +1,261 @@
 """
-main module of project
+module with functions for working with graphs
 """
+import copy
 
 
-def get_not_oriented_graph_from_file(file_name: str) -> dict:
-    # edges_dict = {}
-    with open(file_name, 'r') as f:
-        nodes = list(map(int, (f.readline()).strip().split()))[0]
-        edges_dict = {i: set() for i in range(1, nodes+1)}
-        line = f.readline()
-        while line != '':
-            edge = list(map(int, line.strip().split()))
-            for i in range(2):
-                j = 1 - i
-                try:
+def task1_read_graph(file_name: str, directed=False) -> dict:
+    def get_not_oriented_graph_from_file(file_name: str) -> dict:
+        with open(file_name, 'r') as f:
+            nodes = list(map(int, (f.readline()).strip().split()))[0]
+            edges_dict = {i:set() for i in range(1, nodes + 1)}
+            line = f.readline()
+            while line != '':
+                edge = list(map(int, line.strip().split()))
+                for i in range(2):
+                    j = 1 - i
                     edges_dict[edge[i]].add(edge[j])
-                except KeyError:
-                    edges_dict[edge[i]] = {edge[j]}
+                line = f.readline()
+        return edges_dict
+
+    def get_oriented_graph_from_file(file_name: str) -> dict:
+        with open(file_name, 'r') as f:
+            nodes = list(map(int, (f.readline()).strip().split()))[0]
+            edges_dict = {i:set() for i in range(1, nodes + 1)}
             line = f.readline()
-    return edges_dict
-
-
-def get_oriented_graph_from_file(file_name: str) -> dict:
-    # edges_dict = {}
-    with open(file_name, 'r') as f:
-        nodes = list(map(int, (f.readline()).strip().split()))[0]
-        edges_dict = {i: set() for i in range(1, nodes + 1)}
-        line = f.readline()
-        while line != '':
-            edge = list(map(int, line.strip().split()))
-            try:
+            while line != '':
+                edge = list(map(int, line.strip().split()))
                 edges_dict[edge[0]].add(edge[1])
-            except KeyError:
-                edges_dict[edge[0]] = {edge[1]}
-            line = f.readline()
-    return edges_dict
+                line = f.readline()
+        return edges_dict
 
-
-def read_graph(file_name: str) -> (dict, int):
-    graph = {}
-    nodes = set()
-    dir_not_dir = -1 # not directed (0) or directed (1)
-    if file_name[-4:] == '.csv':
-        dir_not_dir = int(file_name[-5])
-        if dir_not_dir == 0:
-            graph = get_not_oriented_graph_from_file(file_name)
-        elif dir_not_dir == 1:
-            graph = get_oriented_graph_from_file(file_name)
-    return graph, dir_not_dir
-
-
-def write_graph(edges_dict: dict):
-    to_write = set()
-    for edge1 in edges_dict.keys():
-        for edge2 in edges_dict[edge1]:
-            to_write.add((edge1, edge2))
-    with open('graph.csv', 'w') as file:
-        file.write('edge1,edge2\n')
-        for edges in to_write:
-            file.write(str(edges[0]) + ',' + str(edges[1]) + '\n')
-
-
-def del_node(graph: dict, node: int) -> dict:
-    if graph.get(node) is not None:
-        del graph[node]
-    for edge in graph.keys():
-        if node in graph[edge]:
-            graph[edge].remove(node)
+    if directed:
+        graph = get_oriented_graph_from_file(file_name)
+    else:
+        graph = get_not_oriented_graph_from_file(file_name)
     return graph
 
 
-def find_component(graph: dict, source):
-    if source is None or source not in graph:
-        return "Invalid input"
-    graph_c = graph.copy()
-    stack = {source}
-    used_nodes = set()
-
-    while len(stack) != 0:
-        stack_c = stack.copy()
-        for node in stack_c:
-            used_nodes.add(node)
-            to_add = graph[node]
-            stack.remove(node)
-            stack |= to_add
-            graph_c = del_node(graph_c, node)
-    return used_nodes
-
-
-def find_components(graph: dict):
-    graph_c = graph.copy()
-    min_points = set()
-    keys = set(graph_c.keys())
-    while graph_c:
-        component = find_component(graph_c, keys.pop())
-        print(component)
-        min_points.add(min(component))
-        keys -= component
-        for key0 in component:
-            del graph_c[key0]
-    return min_points
+def task2_write_graph(edges_dict: dict, file_name='graph.csv', directed=False):
+    to_write = set()
+    nodes = set()
+    for edge1 in edges_dict.keys():
+        for edge2 in edges_dict[edge1]:
+            if directed:
+                to_write.add((edge1, edge2))
+            else:
+                to_write.add(frozenset((edge1, edge2)))
+            nodes.add(edge1)
+            nodes.add(edge2)
+    with open(file_name, 'w') as file:
+        file.write(f'{len(nodes)},{len(to_write)}\n')
+        for edge in to_write:
+            edge = tuple(edge)
+            file.write(str(edge[0]) + ',' + str(edge[1]) + '\n')
 
 
-def zvyaznist(graph: dict) -> list:
+def task3_find_components(graph: dict) -> list:
     lst_tops = list()
     counter = 0
     while graph != {}:
+        set_tops = set()
         for element in graph:
-            if len(lst_tops) == counter:
-                lst_tops.append(graph[element])
-            else:
-                if element in lst_tops[counter]:
-                    for top in graph[element]:
-                        lst_tops[counter].add(top)
+            set_tops.add(element)
+            while True:
+                for top in graph[element]:
+                    set_tops.add(top)
+                help_set = copy.deepcopy(set_tops)
+                for top in help_set:
+                    if top in graph:
+                        for each_top in graph[top]:
+                            set_tops.add(each_top)
+                if help_set == set_tops:
+                    break
+            lst_tops.append(set_tops)
+            break
         for top in lst_tops[counter]:
             graph.pop(top)
         counter += 1
     return [min(top) for top in lst_tops]
-def main():
-    pass
+
+
+def task4_strong_connection(graph: dict) -> list:
+    def make_transponed_graph(graph: dict) -> dict:
+        graph_t = {}
+        for node in graph:
+            for edge_end in graph[node]:
+                try:
+                    graph_t[edge_end].add(node)
+                except KeyError:
+                    graph_t[edge_end] = {node}
+        for node in range(1, len(graph) + 1):
+            if node not in graph_t:
+                graph_t[node] = set()
+        return graph_t
+
+    def dfs1(node: int, graph: dict, used: list, order: list):
+        used[node - 1] = True
+        stack = [node]
+        while stack:
+            new_node = stack[-1]
+            is_dead_end = True
+            for next_node in graph[new_node]:
+                if not used[next_node - 1]:
+                    stack.append(next_node)
+                    used[next_node - 1] = True
+                    is_dead_end = False
+                    break
+            if is_dead_end:
+                stack.pop()
+                order.append(new_node)
+
+    def dfs2(node: int, graph_t: dict, used: list, component: list):
+        used[node - 1] = True
+        stack = [node]
+        while stack:
+            new_node = stack[-1]
+            is_dead_end = True
+            for next_node in graph_t[new_node]:
+                if not used[next_node - 1]:
+                    stack.append(next_node)
+                    used[next_node - 1] = True
+                    is_dead_end = False
+                    break
+            if is_dead_end:
+                stack.pop()
+                component.append(new_node)
+
+    order = []
+    used = [False] * len(graph)
+    for node in graph:
+        if not used[node - 1]:
+            dfs1(node, graph, used, order)
+    graph_t = make_transponed_graph(graph)
+    used = [False] * len(graph)
+    components = []
+    for i in range(len(graph)):
+        component = []
+        node = order[len(graph) - 1 - i]
+        if not used[node - 1]:
+            dfs2(node, graph_t, used, component)
+            if min(component) not in components:
+                components.append(min(component))
+    components.sort()
+    return components
+
+
+def task5_cutpoints_searching(graph: dict) -> list:
+    def find_articulation_points(graph_dict: dict, input_node: int):
+        stack = [input_node]
+        result = set()
+        parents = {input_node: -1}
+        sons = {i: set() for i in range(1, len(graph_dict)+1)}
+        tin = {input_node: 0}
+        low = {input_node: 0}
+        idx = 0
+        order = [input_node]
+        while stack:
+            node = stack[-1]
+            is_dead_end = True
+            for element in graph_dict[node]:
+                if element not in order:
+                    is_dead_end = False
+                    parents[element] = node
+                    sons[node].add(element)
+                    idx += 1
+                    tin[element] = idx
+                    stack.append(element)
+                    order.append(element)
+                    break
+            if is_dead_end:
+                stack.pop()
+        swap = order[1:]
+        swap = swap[::-1]
+        for idx in range(len(swap)):
+            possible_values = [tin[swap[idx]]]
+            for node in graph_dict[swap[idx]]:
+                if (node not in sons[swap[idx]]) and (node != parents[swap[idx]]):
+                    possible_values.append(tin[node])
+            for node in sons[swap[idx]]:
+                possible_values.append(low[node])
+            low[swap[idx]] = min(possible_values)
+        for idx in range(1, len(graph_dict)+1):
+            if idx != input_node:
+                is_articulation = True
+                if len(sons[idx]) == 0:
+                    is_articulation = False
+                for node in sons[idx]:
+                    if low[node] < tin[idx]:
+                        is_articulation = False
+                        break
+                if is_articulation:
+                    result.add(idx)
+        if len(sons[input_node]) > 1:
+            result.add(input_node)
+        return list(result), order
+
+
+    used = set()
+    res = set()
+    for node in graph:
+        if node not in used:
+            result, order = find_articulation_points(graph, node)
+            res = res | set(result)
+            used = used | set(order)
+    return list(res)
+
+
+def task6_bridge_searching(graph: dict) -> list:
+    def find_bridges(graph_dict: dict, input_node: int):
+        stack = [input_node]
+        result = set()
+        parents = {input_node: -1}
+        sons = {i: set() for i in range(1, len(graph_dict)+1)}
+        tin = {input_node: 0}
+        low = {input_node: 0}
+        idx = 0
+        order = [input_node]
+        while stack:
+            node = stack[-1]
+            is_dead_end = True
+            for element in graph_dict[node]:
+                if element not in order:
+                    is_dead_end = False
+                    parents[element] = node
+                    sons[node].add(element)
+                    idx += 1
+                    tin[element] = idx
+                    stack.append(element)
+                    order.append(element)
+                    break
+            if is_dead_end:
+                stack.pop()
+        swap = order[1:]
+        swap = swap[::-1]
+        for idx in range(len(swap)):
+            possible_values = [tin[swap[idx]]]
+            for node in graph_dict[swap[idx]]:
+                if (node not in sons[swap[idx]]) and (node != parents[swap[idx]]):
+                    possible_values.append(tin[node])
+            for node in sons[swap[idx]]:
+                possible_values.append(low[node])
+            low[swap[idx]] = min(possible_values)
+        for idx in range(1, len(graph_dict)+1):
+            for node in sons[idx]:
+                if low[node] > tin[idx]:
+                    result.add((idx, node))
+        return list(result), order
+
+
+    used = set()
+    res = set()
+    for node in graph:
+        if node not in used:
+            result, order = find_bridges(graph, node)
+            res = res | set(result)
+            used = used | set(order)
+    return list(res)
 
 
 if __name__ == '__main__':
-    # print(get_not_oriented_graph_from_file('data1.txt'))
-    # gr = get_not_oriented_graph_from_file('data1.txt')
-    # print(list(gr.keys())[0])
-
-    graph = {"A": {"B", "C", "D"},
-             "B": {"E"},
-             "C": {"F", "G"},
-             "D": {"H"},
-             "E": {"I"},
-             "F": {"J"}}
-    # print(find_components(gr))
-    # main()
+    print('This module has functions that you can use while working with graphs')
