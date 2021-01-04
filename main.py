@@ -64,26 +64,27 @@ def write_graph(edges_dict: dict, file_name='graph.csv', directed=False):
 # TASK 3
 ###############################################################################
 def find_components_min_nodes(graph: dict) -> list:
+    graph_c = copy.deepcopy(graph)
     lst_tops = list()
     counter = 0
-    while graph != {}:
+    while graph_c != {}:
         set_tops = set()
-        for element in graph:
+        for element in graph_c:
             set_tops.add(element)
             while True:
-                for top in graph[element]:
+                for top in graph_c[element]:
                     set_tops.add(top)
                 help_set = copy.deepcopy(set_tops)
                 for top in help_set:
-                    if top in graph:
-                        for each_top in graph[top]:
+                    if top in graph_c:
+                        for each_top in graph_c[top]:
                             set_tops.add(each_top)
                 if help_set == set_tops:
                     break
             lst_tops.append(set_tops)
             break
         for top in lst_tops[counter]:
-            graph.pop(top)
+            graph_c.pop(top)
         counter += 1
     return [min(top) for top in lst_tops]
 
@@ -310,12 +311,12 @@ def testing_functions():
                read_graph('./graphs/graph_5000_247404_0.csv'),
                read_graph('./graphs/graph_100000_4999_0.csv'),
                read_graph('./graphs/graph_100000_4997346_0.csv')]
-    print('debil')
+    print('text')
     graphs1 = [read_graph('./graphs/graph_100_2160_1.csv', directed=True),
                read_graph('./graphs/graph_5000_248580_1.csv', directed=True),
                read_graph('./graphs/graph_100000_4999_1.csv', directed=True),
                read_graph('./graphs/graph_100000_4998622_1.csv', directed=True)]
-    print('debil')
+    print('text')
 
     def test_function(func, values=graphs0):
         print('Testing ' + func.__name__ + ' :')
@@ -330,4 +331,4 @@ def testing_functions():
 
 if __name__ == '__main__':
     print('This module has functions that you can use while working with graphs')
-    # testing_functions()
+    testing_functions()
