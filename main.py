@@ -4,7 +4,10 @@ module with functions for working with graphs
 import copy
 
 
-def task1_read_graph(file_name: str, directed=False) -> dict:
+###############################################################################
+# TASK 1
+###############################################################################
+def read_graph(file_name: str, directed=False) -> dict:
     def get_not_oriented_graph_from_file(file_name: str) -> dict:
         with open(file_name, 'r') as f:
             nodes = list(map(int, (f.readline()).strip().split()))[0]
@@ -36,7 +39,10 @@ def task1_read_graph(file_name: str, directed=False) -> dict:
     return graph
 
 
-def task2_write_graph(edges_dict: dict, file_name='graph.csv', directed=False):
+###############################################################################
+# TASK 2
+###############################################################################
+def write_graph(edges_dict: dict, file_name='graph.csv', directed=False):
     to_write = set()
     nodes = set()
     for edge1 in edges_dict.keys():
@@ -54,7 +60,10 @@ def task2_write_graph(edges_dict: dict, file_name='graph.csv', directed=False):
             file.write(str(edge[0]) + ',' + str(edge[1]) + '\n')
 
 
-def task3_find_components(graph: dict) -> list:
+###############################################################################
+# TASK 3
+###############################################################################
+def find_components(graph: dict) -> list:
     lst_tops = list()
     counter = 0
     while graph != {}:
@@ -79,7 +88,10 @@ def task3_find_components(graph: dict) -> list:
     return [min(top) for top in lst_tops]
 
 
-def task4_strong_connection(graph: dict) -> list:
+###############################################################################
+# TASK 4
+###############################################################################
+def strong_connection(graph: dict) -> list:
     def make_transponed_graph(graph: dict) -> dict:
         graph_t = {}
         for node in graph:
@@ -144,7 +156,10 @@ def task4_strong_connection(graph: dict) -> list:
     return components
 
 
-def task5_cutpoints_searching(graph: dict) -> list:
+###############################################################################
+# TASK 5
+###############################################################################
+def cutpoints_searching(graph: dict) -> list:
     def find_articulation_points(graph_dict: dict, input_node: int):
         stack = [input_node]
         result = set()
@@ -205,7 +220,10 @@ def task5_cutpoints_searching(graph: dict) -> list:
     return list(res)
 
 
-def task6_bridge_searching(graph: dict) -> list:
+###############################################################################
+# TASK 6
+###############################################################################
+def bridge_searching(graph: dict) -> list:
     def find_bridges(graph_dict: dict, input_node: int):
         stack = [input_node]
         result = set()
