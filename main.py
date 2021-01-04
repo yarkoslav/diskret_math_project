@@ -241,23 +241,12 @@ def cutpoints_searching(graph: dict) -> list:
             result.add(input_node)
         return result
 
-
     res = set()
     components = find_components(graph)
     for component in components:
         node = list(component.keys())[0]
         result = find_articulation_points(component, node)
-        res = res | result
-    return list(res)
-
-
-    used = set()
-    res = set()
-    for node in graph:
-        if node not in used:
-            result, order = find_articulation_points(graph, node)
-            res = res | set(result)
-            used = used | set(order)
+        res |= result
     return list(res)
 
 
@@ -312,9 +301,33 @@ def bridge_searching(graph: dict) -> list:
     for component in components:
         node = list(component.keys())[0]
         result = find_bridges(component, node)
-        res = res | result
+        res |= result
     return list(res)
+
+
+def testing_functions():
+    graphs0 = [read_graph('./graphs/graph_100_1942_0.csv'),
+               read_graph('./graphs/graph_5000_247404_0.csv'),
+               read_graph('./graphs/graph_100000_4999_0.csv'),
+               read_graph('./graphs/graph_100000_4997346_0.csv')]
+    print('debil')
+    graphs1 = [read_graph('./graphs/graph_100_2160_1.csv', directed=True),
+               read_graph('./graphs/graph_5000_248580_1.csv', directed=True),
+               read_graph('./graphs/graph_100000_4999_1.csv', directed=True),
+               read_graph('./graphs/graph_100000_4998622_1.csv', directed=True)]
+    print('debil')
+
+    def test_function(func, values=graphs0):
+        print('Testing ' + func.__name__ + ' :')
+        for value in enumerate(values):
+            print(value[0] + 1, ' value:\n', func(value[1]), sep='')
+        print()
+    test_function(find_components_min_nodes)
+    test_function(strong_connection, graphs1)
+    test_function(cutpoints_searching)
+    test_function(bridge_searching)
 
 
 if __name__ == '__main__':
     print('This module has functions that you can use while working with graphs')
+    # testing_functions()
